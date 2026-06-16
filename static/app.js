@@ -184,11 +184,17 @@ function filterAndRenderReleases() {
                 <h3 class="release-title">${item.title}</h3>
                 <div class="release-body">${item.content}</div>
                 <div class="release-actions">
+                    <button class="btn btn-secondary link-btn" onclick="window.open('${item.link}', '_blank')" ${item.link ? '' : 'disabled'}>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Source
+                    </button>
+                    <button class="btn btn-secondary email-btn" onclick="draftEmail('${item.id}')">
+                        <i class="fa-regular fa-envelope"></i> Email
+                    </button>
                     <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('${item.id}', this)">
-                        <i class="fa-regular fa-copy"></i> Copy Note
+                        <i class="fa-regular fa-copy"></i> Copy
                     </button>
                     <button class="btn btn-secondary compose-btn" onclick="selectReleaseForTweet('${item.id}')">
-                        <i class="fa-solid fa-feather-pointed"></i> Compose Tweet
+                        <i class="fa-solid fa-feather-pointed"></i> Tweet
                     </button>
                 </div>
             </article>
@@ -370,4 +376,18 @@ function exportToCSV() {
     link.click();
     document.body.removeChild(link);
 }
+
+// Open default email client with populated draft
+window.draftEmail = function(id) {
+    const item = allReleases.find(r => r.id === id);
+    if (!item) return;
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = item.content;
+    const bodyText = `Hi Team,\n\nHere is a new Google BigQuery release note update published on ${item.date}:\n\nTitle: ${item.title}\nCategory: ${item.category}\n\nDetails:\n${tempDiv.textContent || tempDiv.innerText}\n\nView original release note: ${item.link}\n\nBest regards,`;
+    
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent('BigQuery Update: ' + item.title)}&body=${encodeURIComponent(bodyText)}`;
+    window.location.href = mailtoUrl;
+};
+
 

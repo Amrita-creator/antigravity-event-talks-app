@@ -503,10 +503,17 @@ body {
 .release-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
     border-top: 1px solid var(--border-color);
     padding-top: 16px;
     margin-top: 8px;
+}
+
+.release-actions .btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    border-radius: 8px;
 }
 
 /* Composer Sidebar */
@@ -681,16 +688,92 @@ body {
     margin-top: 8px;
 }
 
-.tweet-preview-box {
+.mock-tweet-card {
     background-color: var(--preview-bg);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 14px;
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tweet-user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.tweet-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+}
+
+.tweet-names {
+    display: flex;
+    flex-direction: column;
+}
+
+.tweet-display-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.tweet-handle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.tweet-brand-icon {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.tweet-preview-box {
     font-size: 0.9rem;
     line-height: 1.5;
     color: var(--text-main);
     white-space: pre-wrap;
     word-break: break-word;
+    border: none;
+    padding: 0;
+    background: none;
+}
+
+.tweet-metrics {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.tweet-metrics span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.tweet-metrics span:hover {
+    color: var(--primary);
 }
 
 .composer-actions {
