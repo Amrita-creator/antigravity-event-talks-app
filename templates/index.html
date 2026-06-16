@@ -101,41 +101,22 @@
             </div>
         </main>
 
-        <!-- Tweet Composer Sidebar -->
-        <aside class="composer-sidebar">
-            <div class="composer-header">
-                <h2><i class="fa-brands fa-x-twitter"></i> Tweet Composer</h2>
-                <p>Select a release card to compose and publish an update.</p>
+    </div>
+    
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Release Update & Sharing Preview</h3>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
             </div>
-
-            <div class="composer-body">
-                <div id="no-selection-placeholder" class="placeholder-card">
-                    <i class="fa-solid fa-feather-pointed"></i>
-                    <h3>No Release Selected</h3>
-                    <p>Click "Compose Tweet" on any release note card to start drafting your Tweet.</p>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h4><i class="fa-solid fa-file-invoice"></i> Formatted Update</h4>
+                    <div id="modal-release-body" class="modal-preview-box"></div>
                 </div>
-
-                <div id="composer-card" class="composer-card hidden">
-                    <div class="composer-meta">
-                        <span class="category-tag" id="composer-category">Feature</span>
-                        <span class="composer-date" id="composer-date">June 16, 2026</span>
-                    </div>
-                    <h4 id="composer-title">Release Title</h4>
-                    
-                    <div class="textarea-wrapper">
-                        <textarea id="tweet-textarea" placeholder="Draft your tweet here..."></textarea>
-                        <div class="char-count-container">
-                            <svg class="progress-ring" width="30" height="30">
-                                <circle class="progress-ring__circle-bg" stroke="#1f2937" stroke-width="3" fill="transparent" r="12" cx="15" cy="15"/>
-                                <circle class="progress-ring__circle" stroke="#6366f1" stroke-width="3" fill="transparent" r="12" cx="15" cy="15"/>
-                            </svg>
-                            <span id="char-count">280</span>
-                        </div>
-                    </div>
-
-                    <div class="tweet-preview-banner">
-                        <i class="fa-solid fa-eye"></i> Live Tweet Preview
-                    </div>
+                <div class="modal-section">
+                    <h4><i class="fa-brands fa-x-twitter"></i> Tweet Preview</h4>
                     <div class="mock-tweet-card">
                         <div class="tweet-user-info">
                             <div class="tweet-avatar">
@@ -147,9 +128,7 @@
                             </div>
                             <i class="fa-brands fa-x-twitter tweet-brand-icon"></i>
                         </div>
-                        <div class="tweet-preview-box" id="tweet-preview-text">
-                            Select a release note to draft your post.
-                        </div>
+                        <div class="tweet-preview-box" id="modal-tweet-text"></div>
                         <div class="tweet-metrics">
                             <span><i class="fa-regular fa-comment"></i> 0</span>
                             <span><i class="fa-solid fa-retweet"></i> 0</span>
@@ -157,18 +136,24 @@
                             <span><i class="fa-regular fa-bookmark"></i> 0</span>
                         </div>
                     </div>
-
-                    <div class="composer-actions">
-                        <button id="reset-tweet-btn" class="btn btn-secondary">
-                            <i class="fa-solid fa-undo"></i> Reset
-                        </button>
-                        <button id="tweet-btn" class="btn btn-twitter">
-                            <i class="fa-brands fa-x-twitter"></i> Share to X
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-section">
+                    <h4><i class="fa-regular fa-envelope"></i> Email Draft</h4>
+                    <textarea id="modal-email-textarea" class="modal-email-box" readonly></textarea>
                 </div>
             </div>
-        </aside>
+            <div class="modal-footer">
+                <button id="modal-copy-btn" class="btn btn-secondary">
+                    <i class="fa-regular fa-copy"></i> Copy Note
+                </button>
+                <button id="modal-copy-email-btn" class="btn btn-secondary">
+                    <i class="fa-regular fa-envelope"></i> Copy Email
+                </button>
+                <button id="modal-tweet-btn" class="btn btn-twitter">
+                    <i class="fa-brands fa-x-twitter"></i> Post on X
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Script -->

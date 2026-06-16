@@ -1,6 +1,5 @@
 // Global State
 let allReleases = [];
-let selectedRelease = null;
 let currentFilter = 'all';
 
 // DOM Elements
@@ -14,6 +13,19 @@ const exportCsvBtn = document.getElementById('export-csv-btn');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const themeIcon = document.getElementById('theme-icon');
 
+// Modal Elements
+const previewModal = document.getElementById('preview-modal');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const modalReleaseBody = document.getElementById('modal-release-body');
+const modalTweetText = document.getElementById('modal-tweet-text');
+const modalEmailTextarea = document.getElementById('modal-email-textarea');
+const modalCopyBtn = document.getElementById('modal-copy-btn');
+const modalCopyEmailBtn = document.getElementById('modal-copy-email-btn');
+const modalTweetBtn = document.getElementById('modal-tweet-btn');
+
+// State for Modal
+let modalReleaseId = null;
+
 // Initialize Theme Immediately to prevent flicker
 const savedTheme = localStorage.getItem('theme') || 'dark';
 if (savedTheme === 'light') {
@@ -22,27 +34,6 @@ if (savedTheme === 'light') {
 } else {
     document.body.classList.remove('light-theme');
     if (themeIcon) themeIcon.className = 'fa-solid fa-sun';
-}
-
-// Composer DOM Elements
-const noSelectionPlaceholder = document.getElementById('no-selection-placeholder');
-const composerCard = document.getElementById('composer-card');
-const composerCategory = document.getElementById('composer-category');
-const composerDate = document.getElementById('composer-date');
-const composerTitle = document.getElementById('composer-title');
-const tweetTextarea = document.getElementById('tweet-textarea');
-const charCountSpan = document.getElementById('char-count');
-const progressCircle = document.querySelector('.progress-ring__circle');
-const tweetPreviewText = document.getElementById('tweet-preview-text');
-const resetTweetBtn = document.getElementById('reset-tweet-btn');
-const tweetBtn = document.getElementById('tweet-btn');
-
-// Progress Ring Configuration
-const ringRadius = 12;
-const ringCircumference = 2 * Math.PI * ringRadius;
-if (progressCircle) {
-    progressCircle.style.strokeDasharray = `${ringCircumference} ${ringCircumference}`;
-    progressCircle.style.strokeDashoffset = ringCircumference;
 }
 
 // Initialization
@@ -58,7 +49,6 @@ function setupEventListeners() {
         exportCsvBtn.addEventListener('click', exportToCSV);
     }
     if (themeToggleBtn) {
-        // Correct icon state on load if it wasn't rendered yet
         themeIcon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         
         themeToggleBtn.addEventListener('click', () => {
@@ -82,14 +72,55 @@ function setupEventListeners() {
         });
     });
 
-    // Tweet Input Counter & Preview
-    tweetTextarea.addEventListener('input', updateTweetComposerStatus);
+    // Close Modal Listeners
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closePreviewModal);
+    }
+    if (previewModal) {
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) {
+                closePreviewModal();
+            }
+        });
+    }
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !previewModal.classList.contains('hidden')) {
+            closePreviewModal();
+        }
+    });
 
-    // Reset Composer
-    resetTweetBtn.addEventListener('click', resetTweetDraft);
+    // Modal Action Buttons
+    if (modalCopyBtn) {
+        modalCopyBtn.addEventListener('click', () => {
+            const item = allReleases.find(r => r.id === modalReleaseId);
+            if (!item) return;
 
-    // Open Twitter Web Intent
-    tweetBtn.addEventListener('click', publishTweet);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = item.content;
+            const textToCopy = `${item.title}\nDate: ${item.date}\nCategory: ${item.category}\n\n${tempDiv.textContent || tempDiv.innerText}`;
+
+            copyTextToClipboard(textToCopy, modalCopyBtn, "Copy Note");
+        });
+    }
+
+    if (modalCopyEmailBtn) {
+        modalCopyEmailBtn.addEventListener('click', () => {
+            if (modalEmailTextarea) {
+                copyTextToClipboard(modalEmailTextarea.value, modalCopyEmailBtn, "Copy Email");
+            }
+        });
+    }
+
+    if (modalTweetBtn) {
+        modalTweetBtn.addEventListener('click', () => {
+            if (modalTweetText) {
+                const tweetText = modalTweetText.textContent;
+                if (!tweetText) return;
+                const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+                window.open(intentUrl, '_blank');
+            }
+        });
+    }
 }
 
 // Fetch Release Notes from API
@@ -184,17 +215,11 @@ function filterAndRenderReleases() {
                 <h3 class="release-title">${item.title}</h3>
                 <div class="release-body">${item.content}</div>
                 <div class="release-actions">
+                    <button class="btn btn-primary preview-btn" onclick="openPreviewModal('${item.id}')">
+                        <i class="fa-solid fa-eye"></i> Preview Note
+                    </button>
                     <button class="btn btn-secondary link-btn" onclick="window.open('${item.link}', '_blank')" ${item.link ? '' : 'disabled'}>
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Source
-                    </button>
-                    <button class="btn btn-secondary email-btn" onclick="draftEmail('${item.id}')">
-                        <i class="fa-regular fa-envelope"></i> Email
-                    </button>
-                    <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('${item.id}', this)">
-                        <i class="fa-regular fa-copy"></i> Copy
-                    </button>
-                    <button class="btn btn-secondary compose-btn" onclick="selectReleaseForTweet('${item.id}')">
-                        <i class="fa-solid fa-feather-pointed"></i> Tweet
                     </button>
                 </div>
             </article>
@@ -202,145 +227,67 @@ function filterAndRenderReleases() {
     }).join('');
 }
 
-// Select Release Note to Tweet
-window.selectReleaseForTweet = function(id) {
+// Modal View Controls
+window.openPreviewModal = function(id) {
     const item = allReleases.find(r => r.id === id);
     if (!item) return;
 
-    selectedRelease = item;
-    
-    // Toggle sidebars visibility
-    noSelectionPlaceholder.classList.add('hidden');
-    composerCard.classList.remove('hidden');
+    modalReleaseId = id;
 
-    // Populate metadata
-    composerCategory.textContent = item.category;
-    composerDate.textContent = item.date;
-    composerTitle.textContent = item.title;
+    // Apply formatted release HTML body
+    modalReleaseBody.innerHTML = `
+        <h3 style="font-family: var(--font-heading); margin-bottom: 8px; font-size: 1.15rem; color: var(--text-main);">${item.title}</h3>
+        <div style="font-size: 0.8rem; margin-bottom: 16px; color: var(--text-muted);">
+            <span class="category-tag" style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.7rem; background-color: var(--border-color);">${item.category}</span> 
+            &nbsp;•&nbsp; ${item.date}
+        </div>
+        <div>${item.content}</div>
+    `;
 
-    // Remove category class and add the correct one
-    composerCard.className = `composer-card category-${item.category.toLowerCase()}`;
-
-    // Auto-generate starting Tweet text template
-    generateDefaultTweetText(item);
-    updateTweetComposerStatus();
-
-    // Scroll composer into view on mobile
-    if (window.innerWidth <= 1200) {
-        composerCard.scrollIntoView({ behavior: 'smooth' });
-    }
-};
-
-// Generate default tweet template based on category
-function generateDefaultTweetText(item) {
+    // Compose Tweet Draft
     let emoji = '🚀';
     if (item.category === 'Fix') emoji = '🐛';
     if (item.category === 'Deprecation') emoji = '⚠️';
     if (item.category === 'Update') emoji = '⚙️';
 
-    // Strip HTML to plain text for the preview summary
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = item.content;
     let plainText = tempDiv.textContent || tempDiv.innerText || "";
-    
-    // Normalize spaces and trim
     plainText = plainText.replace(/\s+/g, ' ').trim();
-    
-    // Limit snippet to ~140 chars to fit standard tweets easily
     if (plainText.length > 140) {
         plainText = plainText.substring(0, 137) + '...';
     }
-
     const tweetText = `Google BigQuery ${item.category} ${emoji}\n\n${plainText}\n\n#BigQuery #GCP #DataEngineering`;
-    tweetTextarea.value = tweetText;
+    modalTweetText.textContent = tweetText;
+
+    // Compose Email Draft Text
+    const emailDraftText = `Hi Team,\n\nHere is a new Google BigQuery release note update published on ${item.date}:\n\nTitle: ${item.title}\nCategory: ${item.category}\n\nDetails:\n${tempDiv.textContent || tempDiv.innerText}\n\nView original release note: ${item.link}\n\nBest regards,`;
+    modalEmailTextarea.value = emailDraftText;
+
+    // Show the Modal Overlay
+    previewModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Disable background scrolling
+};
+
+function closePreviewModal() {
+    previewModal.classList.add('hidden');
+    document.body.style.overflow = ''; // Re-enable background scrolling
 }
 
-// Update character limits, Progress Ring, and Live Preview
-function updateTweetComposerStatus() {
-    const text = tweetTextarea.value;
-    const maxChars = 280;
-    const remaining = maxChars - text.length;
-
-    charCountSpan.textContent = remaining;
-
-    // Manage color statuses
-    const wrapper = document.querySelector('.char-count-container');
-    wrapper.classList.remove('char-count-warning', 'char-count-danger');
-    
-    if (remaining <= 40 && remaining > 0) {
-        wrapper.classList.add('char-count-warning');
-        if (progressCircle) progressCircle.style.stroke = '#eab308';
-    } else if (remaining <= 0) {
-        wrapper.classList.add('char-count-danger');
-        if (progressCircle) progressCircle.style.stroke = '#f43f5e';
-    } else {
-        if (progressCircle) progressCircle.style.stroke = '#6366f1';
-    }
-
-    // Progress Ring offset
-    if (progressCircle) {
-        const percentage = Math.max(0, Math.min(100, (text.length / maxChars) * 100));
-        const offset = ringCircumference - (percentage / 100) * ringCircumference;
-        progressCircle.style.strokeDashoffset = offset;
-    }
-
-    // Update Live Preview box
-    tweetPreviewText.textContent = text || "(Your tweet text will appear here as a preview)";
-    
-    // Disable or enable tweet button
-    tweetBtn.disabled = text.length === 0 || remaining < 0;
-}
-
-// Reset draft to default state
-function resetTweetDraft() {
-    if (selectedRelease) {
-        generateDefaultTweetText(selectedRelease);
-        updateTweetComposerStatus();
-    }
-}
-
-// Open Tweet Composer in New Window (X intent)
-function publishTweet() {
-    const tweetText = tweetTextarea.value;
-    if (!tweetText) return;
-
-    const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-    window.open(intentUrl, '_blank');
-}
-
-// Utility Loader Toggle
-function showLoader(show) {
-    if (show) {
-        loader.classList.remove('hidden');
-        releasesContainer.classList.add('hidden');
-    } else {
-        loader.classList.add('hidden');
-        releasesContainer.classList.remove('hidden');
-    }
-}
-
-// Copy Release Note to Clipboard
-window.copyToClipboard = function(id, buttonEl) {
-    const item = allReleases.find(r => r.id === id);
-    if (!item) return;
-
-    // Strip HTML to copy pure text
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = item.content;
-    const textToCopy = `${item.title}\nDate: ${item.date}\nCategory: ${item.category}\n\n${tempDiv.textContent || tempDiv.innerText}`;
-
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        const originalContent = buttonEl.innerHTML;
+// Copy Helper function with success UI states
+function copyTextToClipboard(text, buttonEl, originalLabel) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalHTML = buttonEl.innerHTML;
         buttonEl.innerHTML = `<i class="fa-solid fa-check" style="color: var(--color-feature);"></i> Copied!`;
         buttonEl.disabled = true;
         setTimeout(() => {
-            buttonEl.innerHTML = originalContent;
+            buttonEl.innerHTML = originalHTML;
             buttonEl.disabled = false;
-        }, 2000);
+        }, 1500);
     }).catch(err => {
         console.error('Could not copy text: ', err);
     });
-};
+}
 
 // Export all fetched Release Notes to CSV
 function exportToCSV() {
@@ -351,7 +298,6 @@ function exportToCSV() {
 
     const headers = ["ID", "Title", "Date", "Category", "Content", "Link"];
     const rows = allReleases.map(item => {
-        // Strip html tags from content
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = item.content;
         const cleanContent = (tempDiv.textContent || tempDiv.innerText).replace(/"/g, '""');
@@ -377,17 +323,13 @@ function exportToCSV() {
     document.body.removeChild(link);
 }
 
-// Open default email client with populated draft
-window.draftEmail = function(id) {
-    const item = allReleases.find(r => r.id === id);
-    if (!item) return;
-    
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = item.content;
-    const bodyText = `Hi Team,\n\nHere is a new Google BigQuery release note update published on ${item.date}:\n\nTitle: ${item.title}\nCategory: ${item.category}\n\nDetails:\n${tempDiv.textContent || tempDiv.innerText}\n\nView original release note: ${item.link}\n\nBest regards,`;
-    
-    const mailtoUrl = `mailto:?subject=${encodeURIComponent('BigQuery Update: ' + item.title)}&body=${encodeURIComponent(bodyText)}`;
-    window.location.href = mailtoUrl;
-};
-
-
+// Utility Loader Toggle
+function showLoader(show) {
+    if (show) {
+        loader.classList.remove('hidden');
+        releasesContainer.classList.add('hidden');
+    } else {
+        loader.classList.add('hidden');
+        releasesContainer.classList.remove('hidden');
+    }
+}
