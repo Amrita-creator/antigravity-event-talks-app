@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Pulse</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation / Logo / Stats -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-container">
+                    <i class="fa-solid fa-database logo-icon"></i>
+                    <div class="logo-glow"></div>
+                </div>
+                <div class="brand-text">
+                    <h1>BigQuery</h1>
+                    <span class="sub-brand">Release Pulse</span>
+                </div>
+            </div>
+
+            <nav class="filters">
+                <div class="nav-title">Filters</div>
+                <button class="filter-btn active" data-category="all">
+                    <i class="fa-solid fa-list"></i> All Releases
+                </button>
+                <button class="filter-btn" data-category="Feature">
+                    <i class="fa-solid fa-rocket"></i> Features
+                    <span class="badge feature-badge" id="count-feature">0</span>
+                </button>
+                <button class="filter-btn" data-category="Update">
+                    <i class="fa-solid fa-wrench"></i> Updates
+                    <span class="badge update-badge" id="count-update">0</span>
+                </button>
+                <button class="filter-btn" data-category="Fix">
+                    <i class="fa-solid fa-bug-slash"></i> Bug Fixes
+                    <span class="badge fix-badge" id="count-fix">0</span>
+                </button>
+                <button class="filter-btn" data-category="Deprecation">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Deprecations
+                    <span class="badge deprecation-badge" id="count-deprecation">0</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>Data synced from Official Feed</p>
+                <a href="https://docs.cloud.google.com/feeds/bigquery-release-notes.xml" target="_blank" class="feed-link">
+                    <i class="fa-solid fa-rss"></i> View Source Feed
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Feed -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Search release notes...">
+                </div>
+
+                <div class="actions-container">
+                    <button id="refresh-btn" class="btn btn-primary">
+                        <i class="fa-solid fa-rotate-right" id="refresh-icon"></i>
+                        <span>Refresh Notes</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="feed-wrapper">
+                <div class="feed-header">
+                    <h2>Release Feed</h2>
+                    <p class="feed-subtitle">Showing <span id="displayed-count">0</span> release updates</p>
+                </div>
+
+                <!-- Loader -->
+                <div id="loader" class="loader-container">
+                    <div class="spinner"></div>
+                    <p>Fetching latest release notes...</p>
+                </div>
+
+                <!-- Feed Container -->
+                <div id="releases-container" class="releases-grid">
+                    <!-- Release cards will be inserted here dynamically -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Tweet Composer Sidebar -->
+        <aside class="composer-sidebar">
+            <div class="composer-header">
+                <h2><i class="fa-brands fa-x-twitter"></i> Tweet Composer</h2>
+                <p>Select a release card to compose and publish an update.</p>
+            </div>
+
+            <div class="composer-body">
+                <div id="no-selection-placeholder" class="placeholder-card">
+                    <i class="fa-solid fa-feather-pointed"></i>
+                    <h3>No Release Selected</h3>
+                    <p>Click "Compose Tweet" on any release note card to start drafting your Tweet.</p>
+                </div>
+
+                <div id="composer-card" class="composer-card hidden">
+                    <div class="composer-meta">
+                        <span class="category-tag" id="composer-category">Feature</span>
+                        <span class="composer-date" id="composer-date">June 16, 2026</span>
+                    </div>
+                    <h4 id="composer-title">Release Title</h4>
+                    
+                    <div class="textarea-wrapper">
+                        <textarea id="tweet-textarea" placeholder="Draft your tweet here..."></textarea>
+                        <div class="char-count-container">
+                            <svg class="progress-ring" width="30" height="30">
+                                <circle class="progress-ring__circle-bg" stroke="#1f2937" stroke-width="3" fill="transparent" r="12" cx="15" cy="15"/>
+                                <circle class="progress-ring__circle" stroke="#6366f1" stroke-width="3" fill="transparent" r="12" cx="15" cy="15"/>
+                            </svg>
+                            <span id="char-count">280</span>
+                        </div>
+                    </div>
+
+                    <div class="tweet-preview-banner">
+                        <i class="fa-solid fa-eye"></i> Tweet Preview
+                    </div>
+                    <div class="tweet-preview-box" id="tweet-preview-text">
+                        ...
+                    </div>
+
+                    <div class="composer-actions">
+                        <button id="reset-tweet-btn" class="btn btn-secondary">
+                            <i class="fa-solid fa-undo"></i> Reset
+                        </button>
+                        <button id="tweet-btn" class="btn btn-twitter">
+                            <i class="fa-brands fa-x-twitter"></i> Share to X
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Script -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
