@@ -216,7 +216,7 @@ function filterAndRenderReleases() {
                 <div class="release-body">${item.content}</div>
                 <div class="release-actions">
                     <button class="btn btn-primary preview-btn" onclick="openPreviewModal('${item.id}')">
-                        <i class="fa-solid fa-eye"></i> Preview Note
+                        <i class="fa-solid fa-share-nodes"></i> Share
                     </button>
                     <button class="btn btn-secondary link-btn" onclick="window.open('${item.link}', '_blank')" ${item.link ? '' : 'disabled'}>
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Source
