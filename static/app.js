@@ -10,6 +10,7 @@ const searchInput = document.getElementById('search-input');
 const refreshBtn = document.getElementById('refresh-btn');
 const refreshIcon = document.getElementById('refresh-icon');
 const displayedCount = document.getElementById('displayed-count');
+const exportCsvBtn = document.getElementById('export-csv-btn');
 
 // Composer DOM Elements
 const noSelectionPlaceholder = document.getElementById('no-selection-placeholder');
@@ -41,6 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // Event Listeners Setup
 function setupEventListeners() {
     refreshBtn.addEventListener('click', fetchReleases);
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener('click', exportToCSV);
+    }
     
     // Search Filter
     searchInput.addEventListener('input', filterAndRenderReleases);
@@ -158,6 +162,9 @@ function filterAndRenderReleases() {
                 <h3 class="release-title">${item.title}</h3>
                 <div class="release-body">${item.content}</div>
                 <div class="release-actions">
+                    <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('${item.id}', this)">
+                        <i class="fa-regular fa-copy"></i> Copy Note
+                    </button>
                     <button class="btn btn-secondary compose-btn" onclick="selectReleaseForTweet('${item.id}')">
                         <i class="fa-solid fa-feather-pointed"></i> Compose Tweet
                     </button>
@@ -283,3 +290,62 @@ function showLoader(show) {
         releasesContainer.classList.remove('hidden');
     }
 }
+
+// Copy Release Note to Clipboard
+window.copyToClipboard = function(id, buttonEl) {
+    const item = allReleases.find(r => r.id === id);
+    if (!item) return;
+
+    // Strip HTML to copy pure text
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = item.content;
+    const textToCopy = `${item.title}\nDate: ${item.date}\nCategory: ${item.category}\n\n${tempDiv.textContent || tempDiv.innerText}`;
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalContent = buttonEl.innerHTML;
+        buttonEl.innerHTML = `<i class="fa-solid fa-check" style="color: var(--color-feature);"></i> Copied!`;
+        buttonEl.disabled = true;
+        setTimeout(() => {
+            buttonEl.innerHTML = originalContent;
+            buttonEl.disabled = false;
+        }, 2000);
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+};
+
+// Export all fetched Release Notes to CSV
+function exportToCSV() {
+    if (allReleases.length === 0) {
+        alert("No release notes available to export.");
+        return;
+    }
+
+    const headers = ["ID", "Title", "Date", "Category", "Content", "Link"];
+    const rows = allReleases.map(item => {
+        // Strip html tags from content
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = item.content;
+        const cleanContent = (tempDiv.textContent || tempDiv.innerText).replace(/"/g, '""');
+        
+        return [
+            `"${item.id.replace(/"/g, '""')}"`,
+            `"${item.title.replace(/"/g, '""')}"`,
+            `"${item.date.replace(/"/g, '""')}"`,
+            `"${item.category.replace(/"/g, '""')}"`,
+            `"${cleanContent.replace(/\r?\n|\r/g, " ")}"`,
+            `"${item.link.replace(/"/g, '""')}"`
+        ];
+    });
+
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bigquery_release_notes_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
