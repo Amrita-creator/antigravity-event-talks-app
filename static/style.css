@@ -1,4 +1,3 @@
-/* Custom Theme variables */
 :root {
     --bg-dark: #0b0f19;
     --sidebar-bg: #111827;
@@ -19,6 +18,27 @@
 
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'Plus Jakarta Sans', sans-serif;
+
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --preview-bg: rgba(0, 0, 0, 0.2);
+    --brand-color: #ffffff;
+}
+
+.light-theme {
+    --bg-dark: #f8fafc;
+    --sidebar-bg: #ffffff;
+    --card-bg: rgba(241, 245, 249, 0.8);
+    --border-color: rgba(203, 213, 225, 0.5);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    
+    --primary: #4f46e5;
+    --primary-glow: rgba(79, 70, 229, 0.1);
+    --accent: #0284c7;
+
+    --input-bg: rgba(0, 0, 0, 0.03);
+    --preview-bg: rgba(0, 0, 0, 0.05);
+    --brand-color: #0f172a;
 }
 
 * {
@@ -109,9 +129,7 @@ body {
     font-family: var(--font-heading);
     font-size: 1.25rem;
     font-weight: 700;
-    background: linear-gradient(to right, #ffffff, #e2e8f0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--brand-color);
 }
 
 .sub-brand {
@@ -245,11 +263,11 @@ body {
 
 #search-input {
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     padding: 10px 16px 10px 42px;
     border-radius: 10px;
-    color: white;
+    color: var(--text-main);
     outline: none;
     font-family: var(--font-body);
     font-size: 0.9rem;
@@ -259,7 +277,7 @@ body {
 #search-input:focus {
     border-color: var(--primary);
     box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--input-bg);
 }
 
 /* Buttons */
@@ -452,7 +470,7 @@ body {
 .release-body {
     font-size: 0.95rem;
     line-height: 1.6;
-    color: #cbd5e1;
+    color: var(--text-main);
 }
 
 .release-body a {
@@ -592,7 +610,7 @@ body {
     position: relative;
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    background-color: rgba(11, 15, 25, 0.5);
+    background-color: var(--input-bg);
     padding: 12px;
 }
 
@@ -607,7 +625,7 @@ body {
     background: none;
     border: none;
     outline: none;
-    color: white;
+    color: var(--text-main);
     font-family: var(--font-body);
     font-size: 0.95rem;
     resize: none;
@@ -658,13 +676,13 @@ body {
 }
 
 .tweet-preview-box {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--preview-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 14px;
     font-size: 0.9rem;
     line-height: 1.5;
-    color: #e2e8f0;
+    color: var(--text-main);
     white-space: pre-wrap;
     word-break: break-word;
 }

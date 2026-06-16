@@ -11,6 +11,18 @@ const refreshBtn = document.getElementById('refresh-btn');
 const refreshIcon = document.getElementById('refresh-icon');
 const displayedCount = document.getElementById('displayed-count');
 const exportCsvBtn = document.getElementById('export-csv-btn');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeIcon = document.getElementById('theme-icon');
+
+// Initialize Theme Immediately to prevent flicker
+const savedTheme = localStorage.getItem('theme') || 'dark';
+if (savedTheme === 'light') {
+    document.body.classList.add('light-theme');
+    if (themeIcon) themeIcon.className = 'fa-solid fa-moon';
+} else {
+    document.body.classList.remove('light-theme');
+    if (themeIcon) themeIcon.className = 'fa-solid fa-sun';
+}
 
 // Composer DOM Elements
 const noSelectionPlaceholder = document.getElementById('no-selection-placeholder');
@@ -44,6 +56,16 @@ function setupEventListeners() {
     refreshBtn.addEventListener('click', fetchReleases);
     if (exportCsvBtn) {
         exportCsvBtn.addEventListener('click', exportToCSV);
+    }
+    if (themeToggleBtn) {
+        // Correct icon state on load if it wasn't rendered yet
+        themeIcon.className = document.body.classList.contains('light-theme') ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        
+        themeToggleBtn.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light-theme');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            themeIcon.className = isLight ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+        });
     }
     
     // Search Filter
